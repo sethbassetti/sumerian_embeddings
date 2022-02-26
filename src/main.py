@@ -4,9 +4,8 @@ from torch.utils.data import DataLoader
 
 def main():
 
-    # Constructs the path to the sumerian sentences corpus
-    parent_path = os.path.dirname(os.getcwd())
-    data_path = os.path.join(parent_path, "data/sumerian_sentences.txt")
+    # Constructs the path to the sumerian sentences corpusl
+    data_path = os.path.join("data/sumerian_sentences.txt")
 
     # Constructs the dataset and dataloader
     train_set = SumerianDataset(data_path)
