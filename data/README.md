@@ -2,13 +2,16 @@
 Sumerian text is originally written in cuneiform symbols and transliterated
 to latin characters based on its phonetics (before it is ever translated).
 Thus, the transliteration process reveals certain oddities about the language
-that appear within the text file.
+that appear within the text file. These text files following the ATF convention
+(ASCII Translation Format). More information can be found here:
+[CDLI ATF Conventions](https://cdli.ucla.edu/support-cdli)
 
 ## Syllabograms
 A syllabogram is simply a set of characters representing an english sound or
 syllable, such as lu, ku,  or uruda. These syllabograms comprise a sumerian
 word, and are seperated in the text file by hyphens. Words themselves are
-separated by spaces.
+separated by spaces. E.g. lu-uruda-ku ku-uruda-lu2 is 2 words and
+6 syllabograms total
 
 ## Homophones
 Sumerian contains numerous homophones: words with the same pronunciation but
