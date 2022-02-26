@@ -18,8 +18,13 @@ def main():
     for example in train_loader:
         print(example)
         i += 1
-        if i > 50:
+        if i > 100:
             break
+
+    with open('data/sumerian_untranslated.atf.txt' ,'r') as infile:
+        for line in infile.readlines():
+            if "lang akk" in line:
+                print(line)
 
 
 
