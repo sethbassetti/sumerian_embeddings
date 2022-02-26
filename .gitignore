@@ -1,0 +1,9 @@
+# Python
+*.py[cod]
+__pycache__
+venv/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.mypy_cache/
