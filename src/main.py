@@ -1,5 +1,4 @@
 import os
-import time
 from sumerian_data import SumerianDataset
 from torch.utils.data import DataLoader
 
@@ -15,24 +14,15 @@ def main():
     # Custom collate function prevents the automatic attempt to tuple dataset into target/label pairs
     train_loader = DataLoader(train_set, collate_fn=lambda x: x[0])
 
+
     # Very simple example just to see how data is loaded
     i = 0
     # Iterates through the first 50 example sentences and prints them out
-    start = time.time()
     for example in train_loader:
-        for token in example:
-            if not train_set.in_vocab(token):
-                print(token)
-                print(example)
-                print(i)
-                exit()
+        print(example)
         i += 1
-
-    print(str(time.time() - start))
-    
-
-
-
+        if i > 50:
+            break
 
 if __name__ == "__main__":
     main()
