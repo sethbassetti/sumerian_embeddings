@@ -106,6 +106,9 @@ def extract_translations(filtered_documents):
                 if '...' not in parallel_line:
                     sumerian_english_lines.append(parallel_line)
 
+    # Deletes all the duplicates in the text
+    sumerian_english_lines = set(sumerian_english_lines)
+
     return sumerian_english_lines
 
 def clean_text(text):
