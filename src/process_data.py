@@ -97,9 +97,14 @@ def extract_translations(filtered_documents):
             # Match returns a list of sumerian-english tuples
             for sumerian, english in match:
                 
+                
                 # Sanitize the text
                 sumerian_line = clean_text(sumerian).strip()
-                sumerian_english_lines.append(sumerian_line + '|' + english)
+                parallel_line = sumerian_line + '|' + english
+
+                # Delete all lines with '...' since that represents unidentified symbols
+                if '...' not in parallel_line:
+                    sumerian_english_lines.append(parallel_line)
 
     return sumerian_english_lines
 
