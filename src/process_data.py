@@ -28,8 +28,10 @@ def process_data(input_path, output_path):
     processed_docs = process_documents(filtered_docs)
     write_documents(processed_docs, output_path)
 
-    sum_eng_lines = extract_translations(filtered_docs)
-    write_documents(sum_eng_lines, 'sum_eng_lines.txt')
+    # Extracts all lines that have been translated and creates a parallel dataset with them
+    sum_lines, eng_lines = extract_translations(filtered_docs)
+    write_documents(sum_lines, 'sum_lines.txt')
+    write_documents(eng_lines, 'eng_lines.txt')
 
 def filter_documents(raw_documents):
     """Filters out all non-sumerian documents
@@ -100,7 +102,7 @@ def extract_translations(filtered_documents):
                 
                 # Sanitize the text
                 sumerian_line = clean_text(sumerian).strip()
-                parallel_line = sumerian_line + '|' + english
+                parallel_line = sumerian_line + '||' + english
 
                 # Delete all lines with '...' since that represents unidentified symbols
                 if '...' not in parallel_line:
@@ -109,7 +111,11 @@ def extract_translations(filtered_documents):
     # Deletes all the duplicates in the text
     sumerian_english_lines = set(sumerian_english_lines)
 
-    return sumerian_english_lines
+    # Split the list into a list for english lines and a list for the sumerian lines
+    sum_lines = [sentence.split("||")[0] for sentence in sumerian_english_lines]
+    eng_lines = [sentence.split("||")[1] for sentence in sumerian_english_lines]
+
+    return sum_lines, eng_lines
 
 def clean_text(text):
         """Performs a number of regular expression substitutions to sanitize the text so that
