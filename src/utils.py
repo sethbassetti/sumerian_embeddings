@@ -4,7 +4,7 @@ from gensim.models import FastText
 def train_sum_tokenizer():
 
     # Trains a sentence piece tokenizer to construct a vocab and model for the sumerian text
-    spm.SentencePieceTrainer.train(input='data/sum_lines.txt', model_prefix='m', vocab_size=1000, eos_id=1, bos_id=0, unk_id=2)
+    spm.SentencePieceTrainer.train(input='data/sum_lines.txt', model_prefix='m', vocab_size=1000, eos_id=1, bos_id=2, unk_id=3, pad_id=0)
 
 def train_fast_text_embeddings():
     """Trains a Fast Text Model on the sumerian dataset to construct word embeddings"""

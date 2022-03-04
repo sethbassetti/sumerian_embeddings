@@ -8,3 +8,4 @@ htmlcov/
 .coverage.*
 .mypy_cache/
 models/sum_embeddings/
+wandb/
