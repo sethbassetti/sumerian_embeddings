@@ -17,6 +17,7 @@ def main():
         train_fast_text_embeddings()
     model = Word2Vec.load('models/sum_embeddings/fasttext.model')
     print(model.wv.most_similar('masz2'))
+    # masz2 is goat and lugal is king, to get similarity between goat and sheep, change 'lugal' to 'udu' or 'u8'
     print(model.wv.similarity('masz2', 'lugal'))
 
     # The sumerian tokenizer, using a sentencepiece model
