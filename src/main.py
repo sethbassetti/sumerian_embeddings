@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import wandb
 import torch
 from sumerian_data import SumerianDataset, SumerianParallelDataset
@@ -15,13 +17,16 @@ def main():
     sum_tokenizer = T5Tokenizer.from_pretrained('models/sum_tokenizer/m.model', sp_model = spm.SentencePieceProcessor(model_file='models/sum_tokenizer/m.model'))
     eng_tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
-    model = construct_model()
+    
     
     # Defining Hyperparameters
     epochs = 1
     lr = 1e-4
     max_source_length = 512
     max_target_length = 128
+    device = 'cuda'
+
+    model = construct_model().to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
@@ -48,7 +53,7 @@ def main():
             optimizer.zero_grad()
   
             # Send the data through the model
-            outputs = model(input_ids, labels=labels, attention_mask=attention_mask)
+            outputs = model(input_ids.to(device), labels=labels.to(device), attention_mask=attention_mask)
 
             # Retrieves the loss from the model
             loss = outputs.loss
@@ -57,7 +62,7 @@ def main():
             loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
+            running_loss += loss.cpu().item()
 
             # Every 500 datapoints, print the running loss
             wandb.log({'loss': (running_loss / (i+1))})
