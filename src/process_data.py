@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 NEW_DOC_SYMB = '&'
 
@@ -32,6 +33,10 @@ def process_data(input_path, output_path):
     sum_lines, eng_lines = extract_translations(filtered_docs)
     write_documents(sum_lines, 'sum_lines.txt')
     write_documents(eng_lines, 'eng_lines.txt')
+    
+    # Splits both the datasets into train/dev/test splits
+    split_dataset('data/sum_lines.txt')
+    split_dataset('data/eng_lines.txt')
 
 def filter_documents(raw_documents):
     """Filters out all non-sumerian documents
@@ -105,7 +110,7 @@ def extract_translations(filtered_documents):
                 parallel_line = sumerian_line + '||' + english
 
                 # Delete all lines with '...' since that represents unidentified symbols
-                if '...' not in parallel_line:
+                if '...' not in parallel_line and 'xxx' not in parallel_line:
                     sumerian_english_lines.append(parallel_line)
 
     # Deletes all the duplicates in the text
@@ -172,10 +177,45 @@ def clean_text(text):
         return text
 
 def write_documents(documents, output_name):
+    """Writes the documents to the data folder"""
 
     with open(f'data/{output_name}', 'w') as outfile:
         documents = [document + '\n' for document in documents]
         outfile.writelines(documents)
+
+def split_dataset(path):
+    """ Splits the dataset found at path into a train/dev/test set"""
+
+    # Opens the dataset and extracts all the lines from it
+    with open(path, 'r') as dataset:
+        lines = [line.strip() for line in dataset]
+
+    num_samples = len(lines)
+
+    # Gets how many samples make up 10 percent of the data
+    dev_test_split = num_samples // 10
+
+    # Splits the lines into a train/dev/test split
+    dev_set = lines[:dev_test_split]
+    test_set = lines[dev_test_split:dev_test_split*2]
+    train_set = lines[dev_test_split*2:]
+
+    # Puts the datasets in a list and constructs the suffixes to differentiate the dataset paths
+    datasets = [train_set, dev_set, test_set]
+    path_suffixes = ['_train', '_dev', '_test']
+
+    # Iterates through the datasts
+    for dataset, suffix in zip(datasets, path_suffixes):
+
+        # Constructs a new path that includes the train/dev/test suffix
+        original_path = Path(path)
+        new_path = f"data/{original_path.stem}{suffix}{original_path.suffix}"
+
+        with open(new_path, 'w') as outfile:
+            
+            # Adds a newline to the end of every line and writes it to file
+            lines = [line + '\n' for line in dataset]
+            outfile.writelines(lines)
 
 
 def main():

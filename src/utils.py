@@ -18,11 +18,16 @@ def train_fast_text_embeddings():
     # workers just makes it run quicker
     model = FastText(sentences=sentences, vector_size=100, window=10, min_count=2, workers=4)
     model.save('models/sum_embeddings/fasttext.model')
+    
+
+
+
 
 
 def main():
-    train_sum_tokenizer()
+    #train_sum_tokenizer()
     #train_fast_text_emeddings()
+    split_dataset('data/eng_lines.txt')
 
 if __name__ == '__main__':
     main()
