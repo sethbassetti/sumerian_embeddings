@@ -1,2 +1,3 @@
 python3 ~/sumerian_embeddings/src/main.py \
-hyperparameters.mode='train'
+hyperparameters.mode='eval' \
+hyperparameters.epochs=100

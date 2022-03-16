@@ -11,13 +11,14 @@ from utils import train_fast_text_embeddings
 from sumerian_model import construct_model
 import sentencepiece as spm
 import hydra
+import sacrebleu
+import nltk
 
-def translate_sentence(sumerian, sum_tokenizer, eng_tokenizer, model):
+def translate_sentence(sumerian, sum_tokenizer, eng_tokenizer, model, device):
     """ Utility function to translate a sentence from sumerian - english"""
-    model = model.eval()
 
     input_ids = sum_tokenizer(sumerian, return_tensors='pt', max_length=512, padding='longest', truncation=True).input_ids
-    output = model.generate(input_ids)
+    output = model.generate(input_ids.to(device))
 
     decoded_output = eng_tokenizer.decode(output[0], skip_special_tokens=True)
     return decoded_output
@@ -47,7 +48,7 @@ def main(cfg):
     eng_tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
     # Initializes the model and optimizer
-    model = construct_model().to(device)
+    model = construct_model().to(device).train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
     # Loads the checkpoint if it exists
@@ -61,7 +62,9 @@ def main(cfg):
     train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
 
     if mode == 'train':
-        
+
+        # Puts the model in training mode
+        model.train()
         # Initialize a wandb project
         wandb.init(project='sumerian_embeddings')
         for epoch in range(epochs):
@@ -108,11 +111,35 @@ def main(cfg):
                         'mdl_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
                         'loss': (running_loss / (i+1))},
-                        'checkpoints/t5_checkpoint.pt')
+                        checkpoint_path)
+
+    elif mode=='eval':
+        model.eval()
+
+        # Initializes test set
+        test_set = SumerianParallelDataset(english_corpus=join(data_path, 'eng_lines_test.txt'), sumerian_corpus=join(data_path, 'sum_lines_test.txt'))
+        sum_lines = [sumerian for (sumerian, english) in test_set]
+        eng_lines = [english for (sumerian, english) in test_set]
+
+        
+        if not isfile(join(data_path, 'test_translations.txt')):
+            hypotheses = [translate_sentence(sentence, sum_tokenizer, eng_tokenizer, model, device) for sentence in sum_lines]
+            with open(join(data_path, 'test_translations.txt'), 'w') as outfile:
+                hypotheses = [sentence + '\n' for sentence in hypotheses]
+                outfile.writelines(hypotheses)
+
+
+        with open(join(data_path, 'test_translations.txt'), 'r') as infile:
+            hypotheses = [line.strip() for line in infile.readlines()]
+
+        references = [line for line in eng_lines]
+
+        # Computes the BLEU score on the dataset
+        print(sacrebleu.corpus_bleu(hypotheses, references))
 
 
 def test():
-    breakpoint()
+
     T5Tokenizer.from_pretrained('models/sum_tokenizer/')
     
 if __name__ == "__main__":

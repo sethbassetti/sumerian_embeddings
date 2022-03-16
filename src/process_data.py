@@ -107,6 +107,14 @@ def extract_translations(filtered_documents):
                 
                 # Sanitize the text
                 sumerian_line = clean_text(sumerian).strip()
+
+                # Deletes everything in the english line that is within a parentheses
+                english = re.sub(r'\(.*\)', '' ,english)
+                
+                # If the english line is all whitespace, skip it
+                if re.match(r'\s+\Z', english):
+                    continue
+                
                 parallel_line = sumerian_line + '||' + english
 
                 # Delete all lines with '...' since that represents unidentified symbols
