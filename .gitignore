@@ -7,3 +7,7 @@ htmlcov/
 .coverage
 .coverage.*
 .mypy_cache/
+models/sum_embeddings/
+wandb/
+outputs/
+checkpoints/t5_checkpoint.pt
