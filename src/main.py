@@ -48,18 +48,18 @@ def main(cfg):
     eng_tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
     # Initializes the model and optimizer
-    model = construct_model().to(device).train()
+    model = construct_model().to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+
+    # Initializes training set and dataloader
+    train_set = SumerianParallelDataset(english_corpus=join(data_path, 'eng_lines_train.txt'), sumerian_corpus=join(data_path, 'sum_lines_train.txt'))
+    train_loader = DataLoader(train_set, batch_size=64, shuffle=True, num_workers=4)
 
     # Loads the checkpoint if it exists
     if isfile(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['mdl_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-
-    # Initializes training set and dataloader
-    train_set = SumerianParallelDataset(english_corpus=join(data_path, 'eng_lines_train.txt'), sumerian_corpus=join(data_path, 'sum_lines_train.txt'))
-    train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
 
     if mode == 'train':
 
@@ -70,14 +70,17 @@ def main(cfg):
         for epoch in range(epochs):
             running_loss = 0
 
-            for i, data in enumerate(train_loader):
+            for _, data in enumerate(train_loader):
 
                 # All the data will be input/label pairs
                 inputs, labels = data
 
+                # Encodes the input nnto sumerian tokens
                 input_encoding = sum_tokenizer(inputs, return_tensors='pt', max_length=max_source_length, padding='longest', truncation=True)
                 input_ids = input_encoding.input_ids
                 attention_mask = input_encoding.attention_mask
+
+                # Tokenizes the english label
                 labels = eng_tokenizer(labels, return_tensors='pt', max_length=max_target_length, padding='longest', truncation=True).input_ids
 
                 labels[labels == eng_tokenizer.pad_token_id] = -100
@@ -96,21 +99,19 @@ def main(cfg):
                 loss.backward()
                 optimizer.step()
 
-                running_loss += loss.cpu().item()
+                running_loss += loss.item()
 
-                # Every 500 datapoints, print the running loss
-                if (i+1) % 50 == 0:
-                    wandb.log({'loss': (running_loss / (i+1))})
 
-                if (i+1) % 100 == 0:
-                    print(f"Epoch: {epoch}, Sample: {i+1}, Loss: {running_loss / (i+1)}")
-                
-                
+            epoch_loss = running_loss / len(train_loader)
+            # Every epoch, log  and print the loss
+            wandb.log({'loss': epoch_loss})
+            print(f"Epoch: {epoch}, Loss: {epoch_loss}")
+
             # Every epoch save a checkpoint
             torch.save({'epoch': epoch,
                         'mdl_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict(),
-                        'loss': (running_loss / (i+1))},
+                        'loss': epoch_loss},
                         checkpoint_path)
 
     elif mode=='eval':
@@ -128,9 +129,9 @@ def main(cfg):
                 hypotheses = [sentence + '\n' for sentence in hypotheses]
                 outfile.writelines(hypotheses)
 
-
         with open(join(data_path, 'test_translations.txt'), 'r') as infile:
             hypotheses = [line.strip() for line in infile.readlines()]
+
 
         references = [line for line in eng_lines]
 

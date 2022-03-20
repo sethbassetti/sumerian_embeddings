@@ -1,4 +1,5 @@
 import re
+import string
 from pathlib import Path
 
 NEW_DOC_SYMB = '&'
@@ -110,10 +111,20 @@ def extract_translations(filtered_documents):
 
                 # Deletes everything in the english line that is within a parentheses
                 english = re.sub(r'\(.*\)', '' ,english)
+
+                # Deletes all punctuation (except for apostrophe in English)
+                english = re.sub(r'[,“”\"\.:;!]', '', english)
+
+                # Replaces all numbers with a NUM token
+                english = re.sub(r'\d+', '<NUM>', english)
                 
                 # If the english line is all whitespace, skip it
                 if re.match(r'\s+\Z', english):
                     continue
+
+                if re.search(r'x', sumerian):
+                    continue
+
                 
                 parallel_line = sumerian_line + '||' + english
 
@@ -167,6 +178,9 @@ def clean_text(text):
         # The colon character by itself represents a sumerian punctuation mark and is not needed for our tasks
         text = re.sub(r'\s:\s', ' ', text)
 
+        # Remove all commas
+        text = re.sub(r',', '', text)
+
         #NOTE: I could not figure out why the next three occurences appear within the dataset, more research
         # is needed
 
@@ -181,6 +195,8 @@ def clean_text(text):
 
         # Removes any occurence of @ which generally is some comment about the sign
         text = re.sub('@\S', '', text)
+
+
 
         return text
 
