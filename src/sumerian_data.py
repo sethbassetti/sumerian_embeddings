@@ -14,6 +14,15 @@ class SumerianDataset(Dataset):
         self.sentences: List[str] = self.load_corpus(corpus_dir)
 
 
+    def get_vocab_size(self) -> int:
+        return len(self.vocab)
+
+    def get_vocab(self) -> List[str]:
+        return self.vocab
+    
+    def get_corpus(self) -> List[str]:
+        return self.sentences
+
     def load_corpus(self, corpus_dir: str) -> List[str]:
         """Loads the sentences from the corpus into the dataset class
 
