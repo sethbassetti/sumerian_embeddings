@@ -13,6 +13,7 @@ import sentencepiece as spm
 import hydra
 import sacrebleu
 import nltk
+import time
 
 def translate_sentence(sumerian, sum_tokenizer, eng_tokenizer, model, device):
     """ Utility function to translate a sentence from sumerian - english"""
@@ -53,7 +54,7 @@ def main(cfg):
 
     # Initializes training set and dataloader
     train_set = SumerianParallelDataset(english_corpus=join(data_path, 'eng_lines_train.txt'), sumerian_corpus=join(data_path, 'sum_lines_train.txt'))
-    train_loader = DataLoader(train_set, batch_size=64, shuffle=True, num_workers=4)
+    train_loader = DataLoader(train_set, batch_size=64, shuffle=True, num_workers=3, pin_memory=True)
 
     # Loads the checkpoint if it exists
     if isfile(checkpoint_path):
@@ -67,6 +68,7 @@ def main(cfg):
         model.train()
         # Initialize a wandb project
         wandb.init(project='sumerian_embeddings')
+        
         for epoch in range(epochs):
             running_loss = 0
 
@@ -100,7 +102,6 @@ def main(cfg):
                 optimizer.step()
 
                 running_loss += loss.item()
-
 
             epoch_loss = running_loss / len(train_loader)
             # Every epoch, log  and print the loss
