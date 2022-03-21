@@ -13,12 +13,6 @@ class SumerianDataset(Dataset):
 
         self.sentences: List[str] = self.load_corpus(corpus_dir)
 
-
-    def get_vocab_size(self) -> int:
-        return len(self.vocab)
-
-    def get_vocab(self) -> List[str]:
-        return self.vocab
     
     def get_corpus(self) -> List[str]:
         return self.sentences
