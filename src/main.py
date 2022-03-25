@@ -15,7 +15,7 @@ from utils import train_fast_text_embeddings
 from sumerian_model import construct_model
 import sentencepiece as spm
 import hydra
-import sacrebleu
+
 import nltk
 import time
 
@@ -30,14 +30,7 @@ def setup(rank, world_size):
 def cleanup():
     dist.destroy_process_group()
 
-def translate_sentence(sumerian, sum_tokenizer, eng_tokenizer, model, device):
-    """ Utility function to translate a sentence from sumerian - english"""
 
-    input_ids = sum_tokenizer(sumerian, return_tensors='pt', max_length=512, padding='longest', truncation=True).input_ids
-    output = model.generate(input_ids.to(device))
-
-    decoded_output = eng_tokenizer.decode(output[0], skip_special_tokens=True)
-    return decoded_output
 
 @hydra.main(config_path='../config', config_name='default')
 def launch_processes(cfg):

@@ -19,7 +19,14 @@ def train_fast_text_embeddings():
     model = FastText(sentences=sentences, vector_size=100, window=10, min_count=2, workers=4)
     model.save('models/sum_embeddings/fasttext.model')
     
+def translate_sentence(sumerian, sum_tokenizer, eng_tokenizer, model, device):
+    """ Utility function to translate a sentence from sumerian - english"""
 
+    input_ids = sum_tokenizer(sumerian, return_tensors='pt', max_length=512, padding='longest', truncation=True).input_ids
+    output = model.generate(input_ids.to(device))
+
+    decoded_output = eng_tokenizer.decode(output[0], skip_special_tokens=True)
+    return decoded_output
 
 
 
